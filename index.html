@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>오냐오냐 · 가족 초대</title>
+<style>
+  :root { --brown:#B5673B; --ink:#2A211B; --sub:#7A6B5D; --bg:#F9F5F1; --card:#fff; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; height:100%; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    background:var(--bg); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .card {
+    background:var(--card); border-radius:22px; max-width:380px; width:100%;
+    padding:32px 24px; text-align:center; box-shadow:0 12px 40px rgba(80,50,30,.12);
+  }
+  .logo { font-size:34px; margin-bottom:6px; }
+  h1 { font-size:21px; margin:6px 0 4px; }
+  p { color:var(--sub); font-size:15px; line-height:1.55; margin:8px 0; }
+  .code { font-size:32px; font-weight:800; letter-spacing:8px; color:var(--brown); margin:14px 0 4px; }
+  .code-label { font-size:12px; color:var(--sub); }
+  a.btn, button.btn {
+    display:block; width:100%; margin-top:12px; padding:15px; border-radius:14px;
+    font-size:16px; font-weight:700; text-decoration:none; border:none; cursor:pointer;
+  }
+  .btn-primary { background:var(--brown); color:#fff; }
+  .btn-store { background:#fff; color:var(--ink); border:1.5px solid #E3D9CE; }
+  .hint { font-size:12.5px; color:var(--sub); margin-top:18px; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">🧡</div>
+    <h1>오냐오냐 가족 초대</h1>
+    <p id="intro">앱을 열어 가족과 연결하고 있어요…</p>
+
+    <div id="codeBox" class="hidden">
+      <div class="code-label">초대코드</div>
+      <div class="code" id="codeText">------</div>
+    </div>
+
+    <a class="btn btn-primary" id="openApp">앱에서 열기</a>
+    <div id="stores" class="hidden">
+      <p style="margin-top:18px">앱이 없으신가요? 설치 후 이 링크를 다시 누르면 자동으로 연결돼요.</p>
+      <a class="btn btn-store" id="appStore" href="https://apps.apple.com/app/id6787099316">App Store에서 설치</a>
+      <a class="btn btn-store" id="playStore" href="https://play.google.com/store/apps/details?id=com.onyaonya.app">Google Play에서 설치</a>
+    </div>
+
+    <div class="hint">연결이 안 되면 앱 &gt; 설정 &gt; ‘초대코드로 가족 연결’에 위 코드를 입력해 주세요.</div>
+  </div>
+
+<script>
+  // 코드는 해시(#code=…)로 전달 — 서버로 새지 않고 브라우저에서만 읽는다.
+  function getCode() {
+    var h = (location.hash || '').replace(/^#/, '');
+    var q = new URLSearchParams(h.indexOf('code=') >= 0 ? h : (location.search || '').replace(/^\?/, ''));
+    var c = (q.get('code') || '').toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 6);
+    return c;
+  }
+  var code = getCode();
+  var deepLink = 'onyaonya://join?code=' + encodeURIComponent(code);
+
+  if (code) {
+    document.getElementById('codeText').textContent = code;
+    document.getElementById('codeBox').classList.remove('hidden');
+  }
+  document.getElementById('openApp').setAttribute('href', deepLink);
+
+  // 자동으로 앱 열기 시도. 앱이 없으면 아무 일도 안 일어나므로, 잠시 후 스토어 안내를 노출.
+  var opened = false;
+  document.addEventListener('visibilitychange', function () { if (document.hidden) opened = true; });
+  function tryOpen() { if (code) location.href = deepLink; }
+  setTimeout(tryOpen, 300);
+  setTimeout(function () {
+    if (!opened) {
+      document.getElementById('intro').textContent = '앱을 여시거나, 아래에서 설치해 주세요.';
+      document.getElementById('stores').classList.remove('hidden');
+    }
+  }, 1600);
+</script>
+</body>
+</html>
